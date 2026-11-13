@@ -1,44 +1,67 @@
-# Tampermonkey 스크립트 보관소
+# UserScript Collection
 
-## 이전 수정 이력과 구버전
+브라우저 사용자 스크립트(UserScript)의 소스 코드, 배포 버전, 변경 이력 및 이전 버전을 관리하는 저장소입니다. 각 스크립트는 독립적인 기능 단위로 구성되며, 향후 다양한 웹 환경과 자동화 작업을 위한 스크립트를 추가할 수 있도록 설계되었습니다.
 
-- **[전체 패치노트 (CHANGELOG.md)](CHANGELOG.md)** — 버전별 수정 이유, 추가 기능, 개선 시도 및 확인된 한계
-- **[버전별 소스 보관소 (history/)](history/README.md)** — 이전 대화에서 복원한 16개 스냅샷
+스크립트의 실제 적용 범위는 각 파일 상단 메타데이터의 `@match`, `@include`, `@exclude`를 따릅니다.
 
-과거 소스는 `history/`에 보관하며, 설치·자동 업데이트는 아래의 `scripts/` 링크를 사용합니다.
+## Repository Structure
 
-기존 대화에서 제작한 정상 동작 버전을 바탕으로 스크립트를 각각 독립적으로 관리합니다. 소스 코드는 그대로 유지하고 GitHub를 통한 업데이트를 위해 `@updateURL`과 `@downloadURL`만 추가했습니다.
+```text
+.
+├── scripts/          # 설치 및 자동 업데이트용 최신 배포 스크립트
+├── history/          # 버전별 소스 스냅샷(배포 대상 아님)
+│   └── README.md     # 보관된 버전 목록
+├── CHANGELOG.md      # 기능별 변경 이력 및 패치노트
+├── CONTRIBUTING.md   # 버전 관리 및 문서 작성 규칙
+├── LICENSE.txt       # 라이선스 및 기존 저작자 표기
+└── README.md         # 저장소 개요 및 사용 방법
+```
 
-## 설치 링크
+## Scripts
 
-| 스크립트 | 버전 | 설치 |
-| --- | --- | --- |
-| 코네 통합 디코더 4 | 4.0.0 | [Kone_Unified_Decoder.user.js](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Unified_Decoder.user.js) |
-| 코네 이미지 403 자동 복구 (우측 도킹 UI) | 0.3.3 | [Kone_Image_Recovery.user.js](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js) |
-| Kio → Kiosk Downloader (Windows Bridge) | 1.1.0 | [Kio_to_Downloader.user.js](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kio_to_Downloader.user.js) |
-| Base64 드래그 디코더 (코네 제외) | 1.1.0 | [Base64_Drag_Decoder.user.js](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js) |
+| 분류 | 기능 | 버전 | 설치 |
+| --- | --- | --- | --- |
+| 콘텐츠 처리 | 여러 인코딩 및 암호화 형식의 자동 해독, 텍스트 처리와 편의 기능 | 4.0.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Unified_Decoder.user.js) |
+| 리소스 복구 | 만료되거나 실패한 이미지 요청의 주소 재조회 및 자동 복구 | 0.3.3 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js) |
+| 프로그램 연동 | 웹페이지의 다운로드 링크를 로컬 데스크톱 프로그램으로 전달 | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kio_to_Downloader.user.js) |
+| 텍스트 도구 | 선택한 Base64 문자열의 디코딩 결과 표시 및 복사 | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js) |
 
-### 첫 설치 및 기존 스크립트 교체
+**실행 조건**
+- 스크립트별 적용 대상 및 제외 규칙은 UserScript 메타데이터에서 확인할 수 있습니다.
+- 일부 기능은 외부 JavaScript 라이브러리를 사용합니다.
+- 로컬 프로그램 연동 기능에는 Windows 환경의 별도 프로토콜 핸들러가 필요합니다. 사용자 스크립트만 설치해도 로컬 프로그램이 자동 설치되지는 않습니다.
+- 동일 기능의 여러 스크립트를 동시에 활성화하면 UI 또는 이벤트 처리가 중복될 수 있습니다.
 
-1. 먼저 **Tampermonkey → 유틸리티 → ZIP 내보내기**로 현재 설치본을 백업합니다.
-2. 위의 `.user.js` 링크를 Firefox에서 열고 Tampermonkey의 **설치/업데이트**를 진행합니다.
-3. 대시보드에서 동일 기능의 구버전이 중복 실행되지 않는지 확인합니다. 새 스크립트가 별도로 생성되었다면 기존 사본을 비활성화합니다.
-4. 코네와 키오스크 탭을 새로고침해 정상 동작하는지 확인합니다.
+## Installation
 
-**주의:** 별도 Base64 드래그 디코더는 코네 외의 사이트에서 사용하는 선택 기능입니다. 코네 페이지의 드래그 해독은 통합 디코더가 처리합니다.
+1. Tampermonkey 또는 호환되는 사용자 스크립트 관리 확장 프로그램을 설치합니다.
+2. 설치하려는 항목의 **설치** 링크를 열고 스크립트의 권한 및 적용 범위를 확인합니다.
+3. 기존 버전을 사용 중인 경우 설치 데이터를 먼저 백업하고 중복 실행 여부를 확인합니다.
+4. 적용 대상 페이지에서 동작을 확인합니다.
 
-**Kio Windows Bridge:** 이 Tampermonkey 스크립트만으로는 Windows의 Kiosk Downloader가 실행되지 않습니다. 기존 `Kio_Tampermonkey_Bridge_v1.1.zip` 설치 패키지의 로컬 프로토콜 핸들러가 별도로 필요합니다.
+개별 스크립트의 메타데이터와 의존성에 따라 브라우저 및 운영체제별 지원 범위가 다를 수 있습니다.
 
-## 업데이트 방식
+## Updates
 
-각 파일의 메타데이터에 원본 파일의 GitHub Raw URL이 `@updateURL` / `@downloadURL`로 등록되어 있습니다. 앞으로 코드를 수정하면 해당 파일을 갱신하고 **`@version`을 반드시 증가**시킵니다. Tampermonkey가 설정된 주기에 새 버전을 확인하며, 원한다면 확장 프로그램에서 수동으로 업데이트를 확인할 수 있습니다.
+`scripts/`의 배포 파일에는 GitHub Raw 주소를 사용하는 `@updateURL` 및 `@downloadURL`이 설정되어 있습니다.
 
-- GitHub에 코드가 올라갔다고 기존 설치본이 자동으로 이 저장소를 바라보는 것은 아닙니다. **위 링크로 최초 1회 설치/업데이트가 필요합니다.**
-- 각 기능은 분리해 관리합니다. 변경 이력은 Git 커밋에서 확인할 수 있습니다.
-- 현재 소스는 복원한 기존 버전이므로 이 저장소에 올렸다고 브라우저 실기기 테스트가 새로 수행된 것은 아닙니다.
+- 변경 배포 시 `@version`을 증가시킵니다.
+- 스크립트 관리자가 설정된 주기에 새 버전을 확인합니다. 필요하면 수동으로 업데이트를 확인할 수 있습니다.
+- 다른 출처에서 설치한 기존 사본은 이 저장소로 자동 연결되지 않으므로 최초 1회 저장소의 배포 링크로 설치하거나 업데이트해야 합니다.
+- `history/`의 파일은 보관용으로, 자동 업데이트 채널로 사용하지 않습니다.
 
-## 출처 및 보안
+## Version History
 
-통합 디코더는 Kone Merged Decoder, Kone base64 autodecoder Rebuilt(OMNI7), Arca base64 autodecoder(Laria)를 바탕으로 제작됐습니다. 저작권 및 라이선스는 [LICENSE.txt](LICENSE.txt)를 참고하세요. 외부 라이브러리는 각 배포처의 라이선스를 따릅니다.
+- [CHANGELOG.md](CHANGELOG.md) — 버전별 변경 목적, 추가 기능, 수정 사항 및 검증 범위
+- [history/README.md](history/README.md) — 이전 버전 소스 목록 및 보관 정책
+- [GitHub Commits](../../commits/main/) — 저장소 이관 이후 실제 커밋 기록
 
-**이 저장소는 공개 상태입니다.** 계정 비밀번호, API 키, 세션 토큰, 쿠키 등 비밀 정보가 포함된 코드를 절대 커밋하지 마세요. 코드 안에 사이트용 기본 암호 예시가 포함되어 있으므로, 개인적으로 사용하는 비밀 암호를 여기에 직접 추가하지 않는 것이 좋습니다.
+2026-11-13 이전의 기록은 기존 산출물과 확인 가능한 버전 파일을 바탕으로 재구성한 이력입니다. 과거 버전의 보관 날짜와 Git 커밋 날짜는 서로 다를 수 있습니다.
+
+## Development & Maintenance
+
+새 스크립트는 `scripts/`에 독립적인 `.user.js` 파일로 추가합니다. 기능 변경, 버전 증가, 변경 내역 기록 및 이전 소스 백업 기준은 [CONTRIBUTING.md](CONTRIBUTING.md)를 따릅니다.
+
+## Security & License
+
+공개 저장소에는 인증 정보, 쿠키, 개인용 비밀번호, 액세스 토큰 및 비밀 키를 저장하지 않습니다. 외부 라이브러리와 파생 코드의 라이선스 및 저작자 표기는 [LICENSE.txt](LICENSE.txt)와 각 소스 파일을 확인합니다.
