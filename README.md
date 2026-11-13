@@ -19,12 +19,14 @@
 
 ## Scripts
 
-| 분류 | 기능 | 버전 | 설치 |
-| --- | --- | --- | --- |
-| 콘텐츠 처리 | 여러 인코딩 및 암호화 형식의 자동 해독, 텍스트 처리와 편의 기능 | 4.0.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Unified_Decoder.user.js) |
-| 리소스 복구 | 만료되거나 실패한 이미지 요청의 주소 재조회 및 자동 복구 | 0.3.3 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js) |
-| 프로그램 연동 | 웹페이지의 다운로드 링크를 로컬 데스크톱 프로그램으로 전달 | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kio_to_Downloader.user.js) |
-| 텍스트 도구 | 선택한 Base64 문자열의 디코딩 결과 표시 및 복사 | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js) |
+| 스크립트 | 주요 기능 | 적용 사이트 | 버전 | 설치 |
+| --- | --- | --- | --- | --- |
+| 통합 자동 디코더 | Base64·점자·SecureEncoder 해독, 링크·암호 입력 보조 | `kone.gg`, `kio.ac` | 4.0.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Unified_Decoder.user.js) |
+| 이미지 자동 복구 | 실패한 이미지 요청의 새 URL 조회 및 교체 | `kone.gg` | 0.3.3 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js) |
+| 다운로드 프로그램 연동 | 공유 링크를 Windows 로컬 프로그램에 전달 | `kio.ac` | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kio_to_Downloader.user.js) |
+| Base64 드래그 디코더 | 선택한 Base64 문자열 해독·복사 | 전체 HTTP(S) 사이트 (`kone.gg` 제외) | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js) |
+
+적용 사이트는 현재 배포 버전의 메타데이터를 요약한 것입니다. 하위 도메인과 일부 경로에 대한 정확한 실행 조건은 각 `.user.js` 파일의 `@match`·`@exclude`를 확인합니다.
 
 **실행 조건**
 - 스크립트별 적용 대상 및 제외 규칙은 UserScript 메타데이터에서 확인할 수 있습니다.
