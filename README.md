@@ -24,7 +24,7 @@
 | 통합 자동 디코더 | Base64·점자·SecureEncoder 해독, 링크·암호 입력 보조 | `kone.gg`, `kio.ac` | 4.0.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Unified_Decoder.user.js) |
 | 이미지 자동 복구 | 실패한 이미지 요청의 새 URL 조회 및 교체 | `kone.gg` | 0.3.3 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js) |
 | 다운로드 프로그램 연동 | 공유 링크를 Windows 로컬 프로그램에 전달 | `kio.ac` | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kio_to_Downloader.user.js) |
-| Base64 드래그 디코더 | 선택한 Base64 문자열 해독·복사 | 전체 HTTP(S) 사이트 (`kone.gg` 제외) | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js) |
+| Base64 드래그 디코더 | 선택한 Base64 문자열 해독·복사 | 전체 HTTP(S) 사이트 (제외 없음) | 1.2.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js) |
 
 적용 사이트는 현재 배포 버전의 메타데이터를 요약한 것입니다. 하위 도메인과 일부 경로에 대한 정확한 실행 조건은 각 `.user.js` 파일의 `@match`·`@exclude`를 확인합니다.
 
