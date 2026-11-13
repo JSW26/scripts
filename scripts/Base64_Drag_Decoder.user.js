@@ -2,8 +2,8 @@
 // @name         Base64 Drag Decoder (Recreated)
 // @namespace    local.base64.drag.decoder
 // @version      1.2.0
-// @updateURL    https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js
-// @downloadURL  https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js
+// @updateURL    https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Base64_Drag_Decoder.user.js
+// @downloadURL  https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Base64_Drag_Decoder.user.js
 // @description  Highlight Base64 text and click the decode bubble to view or copy decoded text.
 // @match        http://*/*
 // @match        https://*/*
