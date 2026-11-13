@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kone 이미지 403 자동 복구 (새 주소 갱신)
 // @namespace    local.kone.image-renewal
-// @version      0.3.3
+// @version      0.3.4-beta.1
 // @updateURL    https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js
 // @downloadURL  https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js
 // @description  시간이 지나 403으로 실패한 Kone 게시글 이미지의 새 주소를 페이지 재방문 없이 가져와 교체합니다.
@@ -34,12 +34,10 @@
   const seenSources = new WeakMap();
   let lastNearScan = 0;
   let scrollScanTimer = null;
-  let panel = null;
-  let lastResult = '대기 중';
   let stats = { errors: 0, recovered: 0, lastMethod: '-', matched: 0, candidates: 0 };
 
   const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-  const info = (...args) => console.info('[Kone 이미지 복구 0.3.3]', ...args);
+  const info = (...args) => console.info('[Kone 이미지 복구 0.3.4-beta.1]', ...args);
 
   function currentArticle() {
     return document.querySelector(ARTICLE_SELECTOR);
@@ -123,10 +121,8 @@
     stats = { errors: 0, recovered: 0, lastMethod: '-', matched: 0, candidates: 0 };
     setStatus('다른 게시글로 이동함');
   }
+  // 화면 표시 없이 오류·복구 상태를 콘솔에 기록합니다.
   function setStatus(message) {
-    lastResult = message;
-    const out = panel?.querySelector('[data-kr-status]');
-    if (out) out.textContent = message;
     info(message);
   }
   function isArticleImage(img) {
@@ -418,9 +414,6 @@
     resetRouteIfChanged();
     if (running) return running;
     running = (async () => {
-      const button = panel?.querySelector('[data-kr-repair]');
-      if (button) button.disabled = true;
-      try {
         // 수동 복구 시 기존 img에서 실패했지만 error 이벤트를 놓친 경우도 수집합니다.
         if (manual) for (const img of currentArticle()?.querySelectorAll('img') || []) {
           const src = captureSource(img);
@@ -479,98 +472,15 @@
         if (updated) setStatus(`이미지 ${updated}개 복구 · 미일치 ${unmatched}개 · 실패 ${failed}개`);
         else setStatus(`복구 실패: 갱신 URL ${found.size}개 발견, 대상 일치 ${pending.length - unmatched}개`);
         info('결과', {...stats, unmatched, failed});
-      } finally {
-        if (button) button.disabled = false;
-      }
     })();
     try { return await running; } finally { running = null; }
   }
 
-  async function copyDiagnostic() {
-    const diag = [
-      'Kone 이미지 자동복구 v0.3.3',
-      `게시글 경로: ${location.pathname}`,
-      `현재 시각: ${new Date().toLocaleString()}`,
-      `감지 오류 수: ${stats.errors}`,
-      `복구 처리 수: ${stats.recovered}`,
-      `실패 이미지 경로 종류: ${failures.size}`,
-      `새로 받은 이미지 주소 종류: ${stats.candidates}`,
-      `마지막 갱신 방식: ${stats.lastMethod}`,
-      `마지막 상태: ${lastResult}`,
-      // 인증 토큰이 포함된 이미지 주소는 의도적으로 복사하지 않습니다.
-    ].join('\n');
-    try { await navigator.clipboard.writeText(diag); setStatus('진단 내용 복사됨'); }
-    catch (_) { window.prompt('아래 내용을 복사하세요.', diag); }
-  }
-
-  function mountPanel() {
-    if (!document.body || document.getElementById('kr03-panel')) return;
-    panel = document.createElement('div');
-    panel.id = 'kr03-panel';
-    // 메인 통합 디코더 4의 배지와 함께 오른쪽 아래에 세로 정렬합니다. 디코더는 이 패널 높이를 감지해 자동으로 위에 배치됩니다.
-    panel.style.cssText = 'position:fixed!important;left:auto!important;right:12px!important;bottom:12px!important;z-index:2147483646!important;max-width:280px;min-width:180px;background:rgba(34,36,42,.82);color:#fff;border:1px solid #7777;border-radius:9px;padding:8px;box-shadow:0 3px 14px #0005;font:12px/1.4 system-ui,sans-serif;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);';
-    const title = document.createElement('div');
-    title.textContent = 'Kone 이미지 403 복구';
-    title.style.cssText = 'font-weight:700;margin-bottom:5px;';
-    const status = document.createElement('div');
-    status.dataset.krStatus = '';
-    status.textContent = lastResult;
-    status.style.cssText = 'margin-bottom:7px;max-height:50px;overflow:hidden;';
-    const buttons = document.createElement('div');
-    buttons.style.cssText = 'display:flex;gap:5px;';
-    function button(text, action) {
-      const btn = document.createElement('button');
-      btn.textContent = text;
-      btn.type = 'button';
-      btn.style.cssText = 'font:12px system-ui;background:#39465b;color:#fff;border:1px solid #65758a;border-radius:5px;padding:5px 8px;cursor:pointer;';
-      btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); action(); });
-      return btn;
-    }
-    const repairBtn = button('이미지 복구', () => recover(true).catch(err => setStatus('오류: ' + err.message)));
-    repairBtn.dataset.krRepair = '';
-    const diagnoseBtn = button('진단 복사', copyDiagnostic);
-    const collapseBtn = button('접기', () => {
-      const collapsed = !status.hidden;
-      status.hidden = collapsed;
-      repairBtn.hidden = collapsed;
-      diagnoseBtn.hidden = collapsed;
-      collapseBtn.textContent = collapsed ? '펼치기' : '접기';
-      panel.style.minWidth = collapsed ? '0' : '180px';
-    });
-    collapseBtn.title = '닫아도 복구 기능은 계속 실행됩니다';
-    buttons.append(repairBtn, diagnoseBtn, collapseBtn);
-    panel.append(title, status, buttons);
-    document.body.appendChild(panel);
-  }
-  // 사이트 SPA 전환이나 본문 재렌더링으로 패널이 사라져도 다시 표시합니다.
-  // 성능을 위해 body 직계 자식 변경만 감시하며, 본문 전체를 반복 스캔하지 않습니다.
-  let observedBody = null;
-  let bodyObserver = null;
-  function ensurePanel() {
-    if (!document.body) return;
-    if (observedBody !== document.body) {
-      if (bodyObserver) bodyObserver.disconnect();
-      observedBody = document.body;
-      bodyObserver = new MutationObserver(() => {
-        if (!document.getElementById('kr03-panel')) mountPanel();
-      });
-      bodyObserver.observe(document.body, {childList: true});
-    }
-    if (!document.getElementById('kr03-panel')) mountPanel();
-  }
-  function boot() {
-    if (document.body) ensurePanel();
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', ensurePanel, { once: true });
-    }
-    window.addEventListener('load', () => { ensurePanel(); scanBrokenNearViewport(); }, { once: true });
-    // body 전체가 교체되어도 다시 연결합니다.
-    if (document.documentElement) {
-      const rootObserver = new MutationObserver(ensurePanel);
-      rootObserver.observe(document.documentElement, {childList: true});
-    }
-  }
-  window.addEventListener('pageshow', () => { resetRouteIfChanged(); ensurePanel(); });
-  window.addEventListener('popstate', () => { resetRouteIfChanged(); ensurePanel(); });
-  boot();
+  // 오류 및 페이지 이동 감지는 UI 없이 계속 실행합니다.
+  window.addEventListener('load', scanBrokenNearViewport, { once: true });
+  window.addEventListener('pageshow', () => {
+    resetRouteIfChanged();
+    scanBrokenNearViewport();
+  });
+  window.addEventListener('popstate', resetRouteIfChanged);
 })();
