@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kone 이미지 403 자동 복구 (새 주소 갱신)
 // @namespace    local.kone.image-renewal
-// @version      0.3.4
+// @version      0.3.5-beta.1
 // @updateURL    https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Image_Recovery.user.js
 // @downloadURL  https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Image_Recovery.user.js
 // @description  시간이 지나 403으로 실패한 Kone 게시글 이미지의 새 주소를 페이지 재방문 없이 가져와 교체합니다.
@@ -31,13 +31,14 @@
   let autoTimer = null;
   let lastRefreshAt = 0;
   let articlePath = location.pathname;
+  let routeGeneration = 0;
   const seenSources = new WeakMap();
   let lastNearScan = 0;
   let scrollScanTimer = null;
   let stats = { errors: 0, recovered: 0, lastMethod: '-', matched: 0, candidates: 0 };
 
   const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-  const info = (...args) => console.info('[Kone 이미지 복구 0.3.4]', ...args);
+  const info = (...args) => console.info('[Kone 이미지 복구 0.3.5-beta.1]', ...args);
 
   function currentArticle() {
     return document.querySelector(ARTICLE_SELECTOR);
@@ -114,6 +115,7 @@
   function resetRouteIfChanged() {
     if (articlePath === location.pathname) return;
     articlePath = location.pathname;
+    routeGeneration += 1;
     failures.clear();
     freshUrls.clear();
     lastRefreshAt = 0;
@@ -149,6 +151,8 @@
     return url || seenSources.get(img) || null;
   }
   function rememberFailure(img, raw) {
+    // SPA 페이지 이동 직후 첫 이미지 오류도 새 게시글 소속으로 기록합니다.
+    resetRouteIfChanged();
     const url = normalizeUrl(raw);
     if (!url) return;
     const key = keyOf(url);
@@ -186,8 +190,9 @@
 
   // 첫 번째 403이 빠르게 렌더링되어 error 이벤트가 누락된 경우도 보완합니다.
   // 전체 페이지를 반복 검색하지 않도록 화면 근처만, 2초 이상 간격으로 검사합니다.
-  function scanBrokenNearViewport() {
-    if (Date.now() - lastNearScan < 2000) return;
+  function scanBrokenNearViewport(force = false) {
+    resetRouteIfChanged();
+    if (!force && Date.now() - lastNearScan < 2000) return;
     lastNearScan = Date.now();
     const root = currentArticle();
     if (!root) return;
@@ -201,8 +206,14 @@
     if (scrollScanTimer) clearTimeout(scrollScanTimer);
     scrollScanTimer = setTimeout(scanBrokenNearViewport, 450);
   }, { passive: true });
-  window.addEventListener('visibilitychange', () => {
-    if (!document.hidden) setTimeout(scanBrokenNearViewport, 350);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      setTimeout(() => scanBrokenNearViewport(true), 350);
+      setTimeout(() => scanBrokenNearViewport(true), 1200);
+    }
+  });
+  window.addEventListener('focus', () => {
+    setTimeout(() => scanBrokenNearViewport(true), 350);
   });
 
   function pendingRecords() {
@@ -362,11 +373,12 @@
     holder.appendChild(image);
     return true;
   }
-  async function applyRenewal(rec, newUrl) {
+  async function applyRenewal(rec, newUrl, generation) {
     if (rec.lastTried === newUrl) return false;
     rec.lastTried = newUrl;
     rec.attempts += 1;
     if (!(await imagePreload(newUrl))) return false;
+    if (generation !== routeGeneration) return false;
     if (rec.img.isConnected) {
       // 사이트가 src를 원래 값으로 덮어쓰더라도 오버레이 이미지가 유지되도록 합니다.
       const overlay = installOverlay(rec, newUrl);
@@ -413,6 +425,7 @@
   async function recover(manual = true) {
     resetRouteIfChanged();
     if (running) return running;
+    const generation = routeGeneration;
     running = (async () => {
         // 수동 복구 시 기존 img에서 실패했지만 error 이벤트를 놓친 경우도 수집합니다.
         if (manual) for (const img of currentArticle()?.querySelectorAll('img') || []) {
@@ -450,6 +463,8 @@
             source = 'HTML + 숨은 페이지 렌더링';
           } catch (err) { info('프레임 생성 실패', err); }
         }
+        // 이전 게시글의 지연 응답이 다음 게시글의 URL 목록을 덮어쓰지 않도록 합니다.
+        if (generation !== routeGeneration) return;
         freshUrls = found;
         stats.lastMethod = source;
         stats.candidates = found.size;
@@ -458,10 +473,11 @@
         // 과도한 요청을 막기 위해 한 번에 최대 32개만 복구합니다.
         const jobs = pending.slice(0, 32);
         for (let i = 0; i < jobs.length; i += 4) {
+          if (generation !== routeGeneration) return;
           const results = await Promise.all(jobs.slice(i, i + 4).map(async ({key, rec}) => {
             const url = found.get(key);
             if (!url || url === rec.original || url === rec.lastTried) return 'unmatched';
-            return (await applyRenewal(rec, url)) ? 'updated' : 'failed';
+            return (await applyRenewal(rec, url, generation)) ? 'updated' : 'failed';
           }));
           updated += results.filter(r => r === 'updated').length;
           unmatched += results.filter(r => r === 'unmatched').length;
@@ -480,7 +496,11 @@
   window.addEventListener('load', scanBrokenNearViewport, { once: true });
   window.addEventListener('pageshow', () => {
     resetRouteIfChanged();
-    scanBrokenNearViewport();
+    scanBrokenNearViewport(true);
   });
-  window.addEventListener('popstate', resetRouteIfChanged);
+  window.addEventListener('popstate', () => {
+    resetRouteIfChanged();
+    setTimeout(() => scanBrokenNearViewport(true), 350);
+    setTimeout(() => scanBrokenNearViewport(true), 1200);
+  });
 })();
