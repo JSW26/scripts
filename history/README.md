@@ -1,55 +1,34 @@
-# 이전 버전 보관소
+# Version Archive
 
-이 폴더에는 2026-11-13 이전의 대화 및 전달된 파일에서 **실제 소스가 확보된 버전 16개**를 보관합니다.
+이관 이전 및 이전 배포 버전의 소스 스냅샷 보관소입니다.
 
-- 자세한 수정 이유 및 패치노트: [CHANGELOG.md](../CHANGELOG.md)
-- 설치 및 자동 업데이트용 최신 버전: [scripts/](../scripts/)
-- `history/`의 파일은 **과거 원본 스냅샷**입니다. 자동 업데이트 주소를 붙이지 않았으며 일반 사용 시 직접 설치하지 않는 것을 권장합니다.
-- 이전 대화에서 전달했던 ZIP·TXT·JS 원본을 복원한 것이므로 GitHub 커밋 날짜가 과거 출시 날짜를 의미하지 않습니다.
+`history/`의 파일은 버전 비교, 회귀 분석 및 필요 시 이전 동작 복원에 사용하며 **자동 업데이트용 배포 파일이 아닙니다**. 최신 배포본은 [scripts/](../scripts/), 변경 내역은 [CHANGELOG.md](../CHANGELOG.md)를 참조합니다.
 
-## 코네 통합 디코더 (5개)
+## Archive Index
 
-| 버전 | 변경 키워드 | 소스 |
-|---|---|---|
-| 3.0.0 | SecureEncoder + Base64 + Kio 통합 | [원본](kone-unified/v3.0.0.user.js) |
-| 3.0.1 | SPA 경로 전환 시 토큰 상태 초기화 | [원본](kone-unified/v3.0.1.user.js) |
-| 3.1.0 | 캐시, 해독 대기 및 중복 처리 최적화 | [원본](kone-unified/v3.1.0.user.js) |
-| 3.2.0 | 반투명 상태 UI, 이미지 복구 패널과 겹침 방지 | [원본](kone-unified/v3.2.0.user.js) |
-| 4.0.0 | 반복 Base64/점자/SecureEncoder 및 편의 기능 통합 | [원본](kone-unified/v4.0.0.user.js) |
+| 기능 분류 | 버전 | 주요 변경 | 소스 |
+| --- | --- | --- | --- |
+| 콘텐츠 자동 해독 | 3.0.0 | 디코딩 및 입력 보조 기능 통합 | [보기](kone-unified/v3.0.0.user.js) |
+| 콘텐츠 자동 해독 | 3.0.1 | SPA 경로 전환 시 상태 초기화 | [보기](kone-unified/v3.0.1.user.js) |
+| 콘텐츠 자동 해독 | 3.1.0 | 처리 캐시 및 반복 스캔 최적화 | [보기](kone-unified/v3.1.0.user.js) |
+| 콘텐츠 자동 해독 | 3.2.0 | 반투명 UI와 패널 충돌 회피 | [보기](kone-unified/v3.2.0.user.js) |
+| 콘텐츠 자동 해독 | 4.0.0 | 다중 디코딩 형식 및 편의 기능 통합 | [보기](kone-unified/v4.0.0.user.js) |
+| 이미지 리소스 복구 | 0.1.0 | 수동 재시도 및 화면 위치 복원 | [보기](kone-image-recovery/v0.1.0.user.js) |
+| 이미지 리소스 복구 | 0.2.0 | 실패 요청 추적 및 재시도 개선 | [보기](kone-image-recovery/v0.2.0.user.js) |
+| 이미지 리소스 복구 | 0.3.0 | 만료된 리소스 URL 재조회 | [보기](kone-image-recovery/v0.3.0.user.js) |
+| 이미지 리소스 복구 | 0.3.1 | 진단 UI 및 SPA 재렌더링 대응 | [보기](kone-image-recovery/v0.3.1.user.js) |
+| 이미지 리소스 복구 | 0.3.2 | 장시간 비활성 이후 첫 이미지 복구 개선 시도 | [보기](kone-image-recovery/v0.3.2.user.js) |
+| 이미지 리소스 복구 | 0.3.3 | 제어 패널 우측 하단 정렬 | [보기](kone-image-recovery/v0.3.3.user.js) |
+| 선택 텍스트 디코딩 | 1.0.0 | 선택 영역 Base64 디코딩 UI | [보기](base64-drag/v1.0.0.user.js) |
+| 선택 텍스트 디코딩 | 1.1.0 | 다른 해독 기능과의 적용 범위 중복 방지 | [보기](base64-drag/v1.1.0.user.js) |
+| 로컬 프로그램 연동 | 1.1.0 | 사용자 정의 프로토콜을 통한 다운로드 프로그램 호출 | [보기](kio-downloader/v1.1.0.user.js) |
+| 레거시 구성 요소 | 2.3.0 | 중첩 인코딩 자동 해독 | [보기](legacy-precursors/kone-auto-decoder-v2.3.0.user.js) |
+| 레거시 구성 요소 | 1.1 | 동적 입력 양식의 암호 자동 입력 | [보기](legacy-precursors/kio-auto-password-v1.1.user.js) |
 
-## 코네 이미지 복구 (6개)
+## Archive Policy
 
-| 버전 | 변경 키워드 | 소스 |
-|---|---|---|
-| 0.1.0 | 수동 이미지 재시도, 스크롤/펼침 복원 | [원본](kone-image-recovery/v0.1.0.user.js) |
-| 0.2.0 | 실패 이미지의 안전한 재시도 | [원본](kone-image-recovery/v0.2.0.user.js) |
-| 0.3.0 | 403 만료 URL의 새 주소 자동 갱신 | [원본](kone-image-recovery/v0.3.0.user.js) |
-| 0.3.1 | 진단/접기 UI, SPA 재표시 | [원본](kone-image-recovery/v0.3.1.user.js) |
-| 0.3.2 | 오래 방치한 뒤 첫 이미지 오류 개선 시도 | [원본](kone-image-recovery/v0.3.2.user.js) |
-| 0.3.3 | 우측 하단 도킹 UI | [원본](kone-image-recovery/v0.3.3.user.js) |
-
-## Base64 드래그 디코더 (2개)
-
-| 버전 | 변경 키워드 | 소스 |
-|---|---|---|
-| 1.0.0 | 드래그 선택한 Base64 디코딩 및 복사 | [원본](base64-drag/v1.0.0.user.js) |
-| 1.1.0 | Kone 도메인 제외하여 통합 디코더와 중복 방지 | [원본](base64-drag/v1.1.0.user.js) |
-
-## Kio → Kiosk Downloader (1개)
-
-| 버전 | 변경 키워드 | 소스 |
-|---|---|---|
-| 1.1.0 | 임시 Firefox 확장 대신 Tampermonkey 및 Windows 프로토콜 브리지 | [원본](kio-downloader/v1.1.0.user.js) |
-
-## 전신 스크립트 (2개)
-
-| 버전 | 변경 키워드 | 소스 |
-|---|---|---|
-| Kone Auto Decoder 2.3.0 | Spacencode 결과 속 Base64 이중 해독 | [원본](legacy-precursors/kone-auto-decoder-v2.3.0.user.js) |
-| Kio 자동 비밀번호 입력 1.1 | React/Vue에서 비밀번호 자동 입력 | [원본](legacy-precursors/kio-auto-password-v1.1.user.js) |
-
-## 복원되지 않은 다른 과거 패키지
-
-기존 파일 목록에서 다음 초기 산출물도 확인했습니다: Secure Decoder 1.1.1-TM1, Firefox Lite 1.2.0, Kone/Kiosk Secure Decoder Lite 1.0.0, Kone Auto Decoder 2.3.1·2.3.2 ZIP, Firefox Kio Bridge 1.0. 다만 이들은 대용량 번들/ZIP 또는 **서로 다른 전신 도구** 형태이므로 이번 `history/`에는 개별 버전별 소스로 등록하지 않았습니다. 이들의 정확한 변경 내용도 추측해서 만들어 넣지 않았습니다.
-
-전체 역사 기록은 [CHANGELOG.md](../CHANGELOG.md)를 참고하세요.
+- 위 목록은 확보된 **16개 소스 스냅샷**을 정리한 것입니다.
+- 이관 이전 버전의 날짜는 파일 제공·보관 시점을 기준으로 하며 GitHub의 커밋 날짜와 일치하지 않을 수 있습니다.
+- 일부 초기 버전은 독립 소스가 아닌 ZIP 또는 번들 형태로만 확인되어 개별 스냅샷에 포함되지 않았습니다.
+- 이전 버전의 존재 또는 소스 확보가 모든 브라우저 환경에서의 정상 동작을 보증하지는 않습니다.
+- 구버전 소스에서 복구 또는 새 배포가 필요한 경우, 배포 대상인 `scripts/`에서 새 버전으로 관리합니다.
