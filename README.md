@@ -8,15 +8,15 @@
 
 | 이름 | 적용 사이트 | 최신 버전 | 설치 | 패치노트 / 이전 버전 |
 | --- | --- | --- | --- | --- |
-| 통합 자동 디코더 | `kone.gg`, `kio.ac` | 4.0.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Unified_Decoder.user.js) | [기록](history/kone-unified/CHANGELOG.md) |
-| 이미지 자동 복구 | `kone.gg` | 0.3.4 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js) | [기록](history/kone-image-recovery/CHANGELOG.md) |
-| Base64 드래그 디코더 | 전체 HTTP(S) 사이트 | 1.2.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js) | [기록](history/base64-drag/CHANGELOG.md) |
-| 다운로드 프로그램 연동 | `kio.ac` | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kio_to_Downloader.user.js) | [기록](history/kio-downloader/CHANGELOG.md) |
+| 통합 자동 디코더 | `kone.gg`, `kio.ac` | 4.0.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Unified_Decoder.user.js) | [기록](history/kone-unified/CHANGELOG.md) |
+| 이미지 자동 복구 | `kone.gg` | 0.3.4 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Image_Recovery.user.js) | [기록](history/kone-image-recovery/CHANGELOG.md) |
+| Base64 드래그 디코더 | 전체 HTTP(S) 사이트 | 1.2.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Base64_Drag_Decoder.user.js) | [기록](history/base64-drag/CHANGELOG.md) |
+| 다운로드 프로그램 연동 | `kio.ac` | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kio_to_Downloader.user.js) | [기록](history/kio-downloader/CHANGELOG.md) |
 
 ## 폴더 구조
 
 ```text
-tampermonkey-scripts/
+scripts/
 ├── scripts/                       # 최신 배포 스크립트 4개
 │   ├── Kone_Unified_Decoder.user.js
 │   ├── Kone_Image_Recovery.user.js
@@ -40,13 +40,13 @@ tampermonkey-scripts/
 └── README.md
 ```
 
-**최신 스크립트 경로는 유지합니다.** 설치된 Tampermonkey의 `@updateURL`·`@downloadURL`이 해당 위치를 참조하므로, 파일을 옮기면 기존 기기의 자동 업데이트가 끊길 수 있습니다. 대신 스크립트별 변경 이력과 구버전 파일을 같은 `history/` 하위 폴더에 모았습니다.
+**최신 스크립트 파일의 상대 경로는 유지합니다.** 저장소명을 `scripts`로 변경하면서 설치 링크와 `@updateURL`·`@downloadURL`을 새 주소로 수정했습니다. 기존 이름의 GitHub Raw URL에서 새 주소로 자동 연결되는지는 보장할 수 없으므로, 이미 설치한 스크립트는 위 **설치** 링크로 다시 설치하면 확실합니다. 스크립트별 구버전과 변경 이력은 `history/`에서 관리합니다.
 
 ## 설치와 업데이트
 
 **설치 방법:** 브라우저에 [Tampermonkey 확장 프로그램](https://www.tampermonkey.net/)을 설치한 다음, 위 표의 **설치** 링크를 열어 스크립트 설치를 승인합니다. 설치한 스크립트는 Tampermonkey에서 관리하며 지원되는 경우 업데이트를 확인할 수 있습니다. 각 스크립트의 `@match`, `@exclude`, 권한 및 의존성은 실제 소스의 메타데이터를 기준으로 확인하세요.
 
-- 배포 스크립트는 기존 GitHub Raw 주소에서 자동 업데이트됩니다.
+- 배포 스크립트는 새 저장소의 GitHub Raw 주소를 사용해 업데이트합니다.
 - **임시 버전(`-beta.N`) → 실사용 테스트 → 명시적인 컨펌 → 정식 버전** 순서로 변경합니다.
 - 현재 테스트 버전도 `main`의 동일한 업데이트 주소에 배포하므로 다른 설치 기기에 자동 반영될 수 있습니다.
 - `history/`의 구버전 파일은 보관용이며 자동 업데이트용이 아닙니다.
