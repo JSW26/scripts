@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Kone 이미지 403 자동 복구 (새 주소 갱신)
 // @namespace    local.kone.image-renewal
-// @version      0.3.4-beta.1
+// @version      0.3.4
 // @updateURL    https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js
 // @downloadURL  https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Kone_Image_Recovery.user.js
 // @description  시간이 지나 403으로 실패한 Kone 게시글 이미지의 새 주소를 페이지 재방문 없이 가져와 교체합니다.
@@ -37,7 +37,7 @@
   let stats = { errors: 0, recovered: 0, lastMethod: '-', matched: 0, candidates: 0 };
 
   const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-  const info = (...args) => console.info('[Kone 이미지 복구 0.3.4-beta.1]', ...args);
+  const info = (...args) => console.info('[Kone 이미지 복구 0.3.4]', ...args);
 
   function currentArticle() {
     return document.querySelector(ARTICLE_SELECTOR);
