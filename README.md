@@ -9,7 +9,7 @@
 | 이름 | 적용 사이트 | 최신 버전 | 설치 | 패치노트 / 이전 버전 |
 | --- | --- | --- | --- | --- |
 | 통합 자동 디코더 | `kone.gg`, `kio.ac` | 4.0.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Unified_Decoder.user.js) | [기록](history/kone-unified/CHANGELOG.md) |
-| 이미지 자동 복구 | `kone.gg` | 0.3.4 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Image_Recovery.user.js) | [기록](history/kone-image-recovery/CHANGELOG.md) |
+| 이미지 자동 복구 | `kone.gg` | 0.3.5 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Image_Recovery.user.js) | [기록](history/kone-image-recovery/CHANGELOG.md) |
 | Base64 드래그 디코더 | 전체 HTTP(S) 사이트 | 1.2.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Base64_Drag_Decoder.user.js) | [기록](history/base64-drag/CHANGELOG.md) |
 | 다운로드 프로그램 연동 | `kio.ac` | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kio_to_Downloader.user.js) | [기록](history/kio-downloader/CHANGELOG.md) |
 
