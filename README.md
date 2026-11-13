@@ -54,7 +54,7 @@
 
 - [CHANGELOG.md](CHANGELOG.md) — 버전별 변경 목적, 추가 기능, 수정 사항 및 검증 범위
 - [history/README.md](history/README.md) — 이전 버전 소스 목록 및 보관 정책
-- [GitHub Commits](../../commits/main/) — 저장소 이관 이후 실제 커밋 기록
+- [GitHub Commits](https://github.com/JSW26/tampermonkey-scripts/commits/main/) — 저장소 이관 이후 실제 커밋 기록
 
 2026-11-13 이전의 기록은 기존 산출물과 확인 가능한 버전 파일을 바탕으로 재구성한 이력입니다. 과거 버전의 보관 날짜와 Git 커밋 날짜는 서로 다를 수 있습니다.
 
