@@ -1,22 +1,18 @@
 // ==UserScript==
 // @name         Base64 Drag Decoder (Recreated)
 // @namespace    local.base64.drag.decoder
-// @version      1.1.0
+// @version      1.2.0
 // @updateURL    https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js
 // @downloadURL  https://raw.githubusercontent.com/JSW26/tampermonkey-scripts/main/scripts/Base64_Drag_Decoder.user.js
 // @description  Highlight Base64 text and click the decode bubble to view or copy decoded text.
 // @match        http://*/*
 // @match        https://*/*
-// @exclude      https://kone.gg/*
-// @exclude      https://*.kone.gg/*
 // @run-at       document-idle
 // @grant        none
 // ==/UserScript==
 
 (() => {
   'use strict';
-  const host = location.hostname.toLowerCase();
-  if (host === 'kone.gg' || host.endsWith('.kone.gg')) return;
   let popup;
   const hide = () => { if (popup) { popup.remove(); popup = null; } };
 
