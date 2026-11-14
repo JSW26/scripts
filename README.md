@@ -13,7 +13,7 @@
 | Base64 드래그 디코더 | 전체 HTTP(S) 사이트 | 1.2.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Base64_Drag_Decoder.user.js) | [기록](history/base64-drag/CHANGELOG.md) |
 | 다운로드 프로그램 연동 | `kio.ac` | 1.1.0 | [스크립트 설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kio_to_Downloader.user.js) · [Windows 연결 설치](bridge/README.md) | [기록](history/kio-downloader/CHANGELOG.md) |
 
-**중요 — 다운로드 프로그램 연동:** 이 항목은 스크립트만 설치하면 작동하지 않습니다. [Windows 연결 설치 안내](bridge/README.md)를 따라 **최초 1회 `bridge/install.cmd`를 실행**한 다음 Tampermonkey 스크립트를 사용하세요. GitHub에서 스크립트를 재설치해도 Windows 연동 프로그램은 자동 설치되지 않습니다.
+**중요 — 다운로드 프로그램 연동:** Tampermonkey 스크립트는 `1.1.0`, Windows Bridge는 **`1.1.1`**입니다. 이 항목은 스크립트만 설치하면 작동하지 않습니다. [Windows 연결 설치 안내](bridge/README.md)를 따라 **최초 1회 `bridge/install.cmd`를 실행**한 다음 Tampermonkey 스크립트를 사용하세요. GitHub에서 스크립트를 재설치해도 Windows 연동 프로그램은 자동 설치되지 않습니다. Windows Bridge 1.1.1은 앱 실행 후 공유 링크를 자동 붙여넣어 다운로드 준비 화면을 여는 기능을 지원합니다(2026-11-14 사용자 실기기 검증).
 
 ## 폴더 구조
 
