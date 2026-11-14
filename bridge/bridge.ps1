@@ -1,6 +1,5 @@
-# Kio -> Kiosk Downloader Windows Bridge
-# Windows PowerShell 5.1+, per-user registration; no administrator required.
-# The browser invokes: kioffdl://open/<base64url encoded https://kio.ac/c/...>
+# Kio -> Kiosk Downloader Bridge, 1.1.1
+# Windows PowerShell 5.1+, Windows per-user custom URL handler.
 [CmdletBinding(DefaultParameterSetName='Open')]
 param(
     [Parameter(ParameterSetName='Install', Mandatory=$true)] [switch] $Install,
@@ -9,171 +8,164 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = Join-Path $env:LOCALAPPDATA 'KioDownloaderBridge'
-$configFile = Join-Path $root 'config.json'
-$installedScript = Join-Path $root 'bridge.ps1'
-$schemeKey = 'Software\Classes\kioffdl'
+$configPath = Join-Path $root 'config.json'
+$launcherPath = Join-Path $root 'bridge.ps1'
+$regPath = 'Software\Classes\kioffdl'
 
-function Notify([string]$message, [bool]$isError = $false) {
+function Notify([string] $message, [bool] $errorState = $false) {
     try {
         Add-Type -AssemblyName System.Windows.Forms
-        $icon = if ($isError) { [System.Windows.Forms.MessageBoxIcon]::Error } else { [System.Windows.Forms.MessageBoxIcon]::Information }
-        [System.Windows.Forms.MessageBox]::Show($message, 'Kio -> Kiosk Downloader', [System.Windows.Forms.MessageBoxButtons]::OK, $icon) | Out-Null
-    } catch {
-        Write-Host $message
-    }
+        $ico = if ($errorState) { [System.Windows.Forms.MessageBoxIcon]::Error } else { [System.Windows.Forms.MessageBoxIcon]::Information }
+        [System.Windows.Forms.MessageBox]::Show($message, 'Kio Downloader Bridge', [System.Windows.Forms.MessageBoxButtons]::OK, $ico) | Out-Null
+    } catch { Write-Host $message }
 }
-function ValidExe([string]$path) {
-    return ($path -and $path.EndsWith('.exe', [StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $path -PathType Leaf))
+function IsExe([string] $path) {
+    return [bool]($path -and $path.EndsWith('.exe', [StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $path -PathType Leaf))
 }
-function FindDownloader {
-    if (Test-Path -LiteralPath $configFile) {
+function FindExe {
+    if (Test-Path -LiteralPath $configPath) {
         try {
-            $old = Get-Content -LiteralPath $configFile -Raw -Encoding UTF8 | ConvertFrom-Json
-            if (ValidExe $old.exe) { return [string]$old.exe }
-        } catch { }
+            $old = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            if (IsExe ([string]$old.exe)) { return [string]$old.exe }
+        } catch {}
     }
-    $dirs = @(
-        (Join-Path $env:LOCALAPPDATA 'Programs\kiosk-downloader'),
+    $locations = @(
         (Join-Path $env:LOCALAPPDATA 'Programs\Kiosk Downloader'),
+        (Join-Path $env:LOCALAPPDATA 'Programs\kiosk-downloader'),
         (Join-Path $env:LOCALAPPDATA 'kiosk-downloader'),
         (Join-Path $env:ProgramFiles 'Kiosk Downloader'),
         (Join-Path $env:ProgramFiles 'kiosk-downloader')
     )
-    if (${env:ProgramFiles(x86)}) {
-        $dirs += Join-Path ${env:ProgramFiles(x86)} 'Kiosk Downloader'
-    }
-    foreach ($dir in $dirs) {
-        foreach ($name in @('Kiosk Downloader.exe', 'kiosk-downloader.exe')) {
+    if (${env:ProgramFiles(x86)}) { $locations += (Join-Path ${env:ProgramFiles(x86)} 'Kiosk Downloader') }
+    foreach ($dir in $locations) {
+        foreach ($name in @('Kiosk Downloader.exe','kiosk-downloader.exe')) {
             $candidate = Join-Path $dir $name
-            if (ValidExe $candidate) { return $candidate }
-        }
-    }
-    foreach ($hive in @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall')) {
-        if (!(Test-Path $hive)) { continue }
-        foreach ($entry in (Get-ChildItem -Path $hive -ErrorAction SilentlyContinue)) {
-            $props = Get-ItemProperty -LiteralPath $entry.PSPath -ErrorAction SilentlyContinue
-            if ($props.DisplayName -notmatch 'Kiosk Downloader') { continue }
-            $iconPath = ([string]$props.DisplayIcon -replace ',\d+$', '').Trim('"')
-            if (ValidExe $iconPath) { return $iconPath }
-            if ($props.InstallLocation) {
-                foreach ($name in @('Kiosk Downloader.exe', 'kiosk-downloader.exe')) {
-                    $candidate = Join-Path $props.InstallLocation $name
-                    if (ValidExe $candidate) { return $candidate }
-                }
-            }
+            if (IsExe $candidate) { return $candidate }
         }
     }
     Add-Type -AssemblyName System.Windows.Forms
-    $dialog = New-Object System.Windows.Forms.OpenFileDialog
-    $dialog.Title = 'Select Kiosk Downloader.exe (installed or portable)'
-    $dialog.Filter = 'Windows executable (*.exe)|*.exe'
-    $dialog.CheckFileExists = $true
-    if ($dialog.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) { return $null }
-    return $dialog.FileName
+    $picker = New-Object System.Windows.Forms.OpenFileDialog
+    $picker.Title = 'Choose the Kiosk Downloader executable (.exe)'
+    $picker.Filter = 'Executable (*.exe)|*.exe'
+    $picker.CheckFileExists = $true
+    if ($picker.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) { return $null }
+    return [string]$picker.FileName
 }
-function GetUrlFromProtocol([string]$rawUri) {
-    # Strictly constrain the handler to the format emitted by the userscript.
-    if ($rawUri -cnotmatch '^kioffdl://open/([A-Za-z0-9_-]{8,4096})/?$') {
-        throw 'Invalid Kio bridge URL format.'
+function ParseLink([string] $s) {
+    if ($s -cnotmatch '^kioffdl://open/([A-Za-z0-9_-]{8,4096})/?$') {
+        throw 'Unsupported Kio bridge link.'
     }
-    $payload = $Matches[1].Replace('-', '+').Replace('_', '/')
-    switch ($payload.Length % 4) {
+    $encoded = $Matches[1].Replace('-', '+').Replace('_', '/')
+    switch ($encoded.Length % 4) {
         0 { }
-        2 { $payload += '==' }
-        3 { $payload += '=' }
-        default { throw 'Invalid URL payload.' }
+        2 { $encoded += '==' }
+        3 { $encoded += '=' }
+        default { throw 'Malformed URL data.' }
     }
-    $bytes = [Convert]::FromBase64String($payload)
-    $utf8 = [System.Text.UTF8Encoding]::new($false, $true)
-    $urlString = $utf8.GetString($bytes)
-    $url = $null
-    if (![Uri]::TryCreate($urlString, [UriKind]::Absolute, [ref]$url)) {
-        throw 'Invalid share URL.'
+    $bytes = [Convert]::FromBase64String($encoded)
+    $decoder = New-Object System.Text.UTF8Encoding($false, $true)
+    $text = $decoder.GetString($bytes)
+    $result = $null
+    if (![Uri]::TryCreate($text, [UriKind]::Absolute, [ref]$result)) {
+        throw 'The share URL is invalid.'
     }
-    if ($url.Scheme -cne 'https' -or @('kio.ac','www.kio.ac') -cnotcontains $url.Host -or !$url.IsDefaultPort -or $url.UserInfo -or $url.AbsolutePath -cnotmatch '^/c/[A-Za-z0-9_-]+/?$') {
-        throw 'Only https://kio.ac/c/... share links are allowed.'
+    if ($result.Scheme -cne 'https' -or @('kio.ac','www.kio.ac') -cnotcontains $result.Host -or
+        !$result.IsDefaultPort -or $result.UserInfo -or $result.AbsolutePath -cnotmatch '^/c/[A-Za-z0-9_-]+/?$') {
+        throw 'Only kio.ac/c/... share links are supported.'
     }
-    return $url.GetLeftPart([UriPartial]::Path)
+    return $result.GetLeftPart([UriPartial]::Path)
 }
-function CopyShareUrl([string]$value) {
+function CopyLink([string] $s) {
     Add-Type -AssemblyName System.Windows.Forms
-    $errors = @()
-    # Clipboard can be temporarily locked by another application.
-    for ($i=0; $i -lt 8; $i++) {
+    for ($n=0; $n -lt 8; $n++) {
         try {
-            [System.Windows.Forms.Clipboard]::SetText($value, [System.Windows.Forms.TextDataFormat]::UnicodeText)
+            [System.Windows.Forms.Clipboard]::SetText($s, [System.Windows.Forms.TextDataFormat]::UnicodeText)
             return
-        } catch {
-            $errors += $_.Exception.Message
-            Start-Sleep -Milliseconds 160
-        }
+        } catch { Start-Sleep -Milliseconds 180 }
     }
-    try {
-        Set-Clipboard -Value $value -ErrorAction Stop
-        return
-    } catch {
-        throw ('Failed to copy URL to the clipboard: ' + $_.Exception.Message)
-    }
+    Set-Clipboard -Value $s -ErrorAction Stop
 }
-
+function PasteOnlyIntoDownloader([string] $exe) {
+    # Launching a second Electron instance focuses the first via the app's second-instance handler.
+    Start-Process -FilePath $exe -ErrorAction Stop | Out-Null
+    $shell = New-Object -ComObject WScript.Shell
+    $name = [System.IO.Path]::GetFileNameWithoutExtension($exe)
+    # Verify the foreground PID before sending keystrokes, so no other app receives the link.
+    if (-not ('KioForeground' -as [type])) {
+        Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class KioForeground {
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
+}
+'@
+    }
+    for ($attempt=0; $attempt -lt 45; $attempt++) {
+        $candidates = @(Get-Process -Name $name -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero })
+        foreach ($proc in $candidates) {
+            $sameExe = $false
+            try { $sameExe = [string]::Equals($proc.Path, $exe, [StringComparison]::OrdinalIgnoreCase) } catch {}
+            # Portable EXEs can unpack and launch the actual app from a temporary path.
+            $isKioskWindow = ([string]$proc.MainWindowTitle -eq 'Kiosk Desktop')
+            if (-not $sameExe -and -not $isKioskWindow) { continue }
+            try {
+                if (-not $shell.AppActivate([int]$proc.Id)) { continue }
+                Start-Sleep -Milliseconds 250
+                [uint32]$foregroundPid = 0
+                $handle = [KioForeground]::GetForegroundWindow()
+                [void][KioForeground]::GetWindowThreadProcessId($handle, [ref]$foregroundPid)
+                if ($foregroundPid -ne [uint32]$proc.Id) { continue }
+                $shell.SendKeys('^v')
+                return $true
+            } catch { continue }
+        }
+        Start-Sleep -Milliseconds 200
+    }
+    return $false
+}
 try {
     if ($Install) {
-        $exe = FindDownloader
-        if (!(ValidExe $exe)) { throw 'No Kiosk Downloader executable selected. Installation cancelled.' }
+        $exe = FindExe
+        if (!(IsExe $exe)) { throw 'No Kiosk Downloader executable selected. Installation cancelled.' }
         New-Item -ItemType Directory -Path $root -Force | Out-Null
-        $source = $MyInvocation.MyCommand.Path
-        if (![string]::Equals($source, $installedScript, [StringComparison]::OrdinalIgnoreCase)) {
-            Copy-Item -LiteralPath $source -Destination $installedScript -Force
+        $from = $MyInvocation.MyCommand.Path
+        if (![string]::Equals($from, $launcherPath, [StringComparison]::OrdinalIgnoreCase)) {
+            Copy-Item -LiteralPath $from -Destination $launcherPath -Force
         }
-        @{ exe = $exe } | ConvertTo-Json | Set-Content -LiteralPath $configFile -Encoding UTF8
-        $powerShellExe = Join-Path $PSHOME 'powershell.exe'
-        $command = '"{0}" -NoProfile -ExecutionPolicy Bypass -STA -WindowStyle Hidden -File "{1}" -Uri "%1"' -f $powerShellExe, $installedScript
-        $key = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($schemeKey)
+        @{ exe = $exe } | ConvertTo-Json | Set-Content -LiteralPath $configPath -Encoding UTF8
+        $command = '"{0}" -NoProfile -ExecutionPolicy Bypass -STA -WindowStyle Hidden -File "{1}" -Uri "%1"' -f (Join-Path $PSHOME 'powershell.exe'), $launcherPath
+        $rk = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($regPath)
         try {
-            $key.SetValue('', 'URL:Kio to Kiosk Downloader')
-            $key.SetValue('URL Protocol', '')
-            $commandKey = $key.CreateSubKey('shell\open\command')
-            try { $commandKey.SetValue('', $command) } finally { $commandKey.Dispose() }
-        } finally { $key.Dispose() }
-        Notify "Windows connection installed.`n`nDownloader:`n$exe`n`nReturn to Firefox and click Kio down-arrow."
+            $rk.SetValue('', 'URL:Kio Downloader Bridge')
+            $rk.SetValue('URL Protocol', '')
+            $child = $rk.CreateSubKey('shell\open\command')
+            try { $child.SetValue('', $command) } finally { $child.Dispose() }
+        } finally { $rk.Dispose() }
+        Notify "Bridge installed.`n`nDownloader:`n$exe`n`nClick Kio down-arrow in Firefox to test automatic paste."
         exit 0
     }
     if ($Uninstall) {
-        # Only remove the scheme if it still points to our own installed handler.
-        $key = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey($schemeKey)
-        if ($key) {
-            $key.Dispose()
-            $commandKey = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey($schemeKey + '\shell\open\command')
-            $command = if ($commandKey) { [string]$commandKey.GetValue('') } else { '' }
-            if ($commandKey) { $commandKey.Dispose() }
-            if ($command.Contains($installedScript)) {
-                [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree($schemeKey, $false)
-            }
+        $cmdKey = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey($regPath + '\shell\open\command')
+        $command = if ($cmdKey) { [string]$cmdKey.GetValue('') } else { '' }
+        if ($cmdKey) { $cmdKey.Dispose() }
+        if ($command.Contains($launcherPath)) {
+            [Microsoft.Win32.Registry]::CurrentUser.DeleteSubKeyTree($regPath, $false)
         }
         if (Test-Path -LiteralPath $root) { Remove-Item -LiteralPath $root -Recurse -Force }
-        Notify 'Kio Windows connection uninstalled. The Kiosk Downloader application was not removed.'
+        Notify 'Windows bridge removed. Kiosk Downloader itself has not been deleted.'
         exit 0
     }
-    $url = GetUrlFromProtocol $Uri
-    if (!(Test-Path -LiteralPath $configFile)) { throw 'The bridge is not installed. Run install.cmd again.' }
-    $settings = Get-Content -LiteralPath $configFile -Raw -Encoding UTF8 | ConvertFrom-Json
-    $exe = [string]$settings.exe
-    if (!(ValidExe $exe)) { throw 'Kiosk Downloader executable was moved or removed. Run install.cmd again.' }
-    CopyShareUrl $url
-    # Launch the actual application. A native URL-import API is not assumed.
-    # If already running, bring it to the foreground rather than open another copy.
-    $existing = Get-Process -ErrorAction SilentlyContinue | Where-Object {
-        try { $_.Path -and [string]::Equals($_.Path, $exe, [StringComparison]::OrdinalIgnoreCase) } catch { $false }
-    } | Select-Object -First 1
-    if ($existing) {
-        try {
-            $shell = New-Object -ComObject WScript.Shell
-            if (!$shell.AppActivate($existing.Id)) { Start-Process -FilePath $exe }
-        } catch { Start-Process -FilePath $exe }
-    } else {
-        Start-Process -FilePath $exe
+    $link = ParseLink $Uri
+    if (!(Test-Path -LiteralPath $configPath)) { throw 'Bridge is not installed. Run install.cmd.' }
+    $cfg = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $exe = [string]$cfg.exe
+    if (!(IsExe $exe)) { throw 'Kiosk Downloader was moved or removed. Run install.cmd again.' }
+    CopyLink $link
+    if (-not (PasteOnlyIntoDownloader $exe)) {
+        Notify 'The Kio link was copied, but the app window could not be focused safely. Open Kiosk Downloader and press Ctrl+V manually.' $true
     }
 } catch {
-    Notify ("Error: " + $_.Exception.Message) $true
+    Notify ('Bridge error: ' + $_.Exception.Message) $true
     exit 1
 }
