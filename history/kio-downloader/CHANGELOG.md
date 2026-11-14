@@ -6,6 +6,12 @@
 
 **적용 사이트:** `kio.ac` (Windows 로컬 프로그램 연동)
 
+### Windows Bridge 1.1.1 — 2026-11-14 (사용자 검증 완료)
+- 테스트 버전 `1.1.1-beta.1`이 사용자의 Windows 환경에서 정상 동작함을 확인해 정식 버전으로 승격했습니다.
+- Kiosk Downloader 실행/창 활성화 뒤 **Ctrl+V를 자동으로 전송**해 공유 링크가 새 다운로드 화면에 전달되도록 수정했습니다.
+- 전경 창의 PID를 확인하고, 확인 실패 시 클립보드에 남긴 URL을 수동으로 붙여넣도록 안내합니다.
+- **변경 대상:** [Windows Bridge](../../bridge/bridge.ps1)만 수정. Tampermonkey `Kio_to_Downloader.user.js`는 기존 `1.1.0` 유지.
+
 ### Windows 연결 설치 파일 추가 — 2026-11-14 (스크립트 버전 변경 없음)
 - 저장소에 누락되어 있던 최초 설치용 [Windows 연결 파일](../../bridge/README.md)을 추가했습니다.
 - `install.cmd`는 `kioffdl://` 프로토콜을 현재 Windows 사용자 계정에 등록하고 Kiosk Downloader 실행 파일을 연결합니다.
