@@ -11,7 +11,9 @@
 | 통합 자동 디코더 | `kone.gg`, `kio.ac` | 4.0.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Unified_Decoder.user.js) | [기록](history/kone-unified/CHANGELOG.md) |
 | 이미지 자동 복구 | `kone.gg` | 0.3.5 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kone_Image_Recovery.user.js) | [기록](history/kone-image-recovery/CHANGELOG.md) |
 | Base64 드래그 디코더 | 전체 HTTP(S) 사이트 | 1.2.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Base64_Drag_Decoder.user.js) | [기록](history/base64-drag/CHANGELOG.md) |
-| 다운로드 프로그램 연동 | `kio.ac` | 1.1.0 | [설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kio_to_Downloader.user.js) | [기록](history/kio-downloader/CHANGELOG.md) |
+| 다운로드 프로그램 연동 | `kio.ac` | 1.1.0 | [스크립트 설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/Kio_to_Downloader.user.js) · [Windows 연결 설치](bridge/README.md) | [기록](history/kio-downloader/CHANGELOG.md) |
+
+**중요 — 다운로드 프로그램 연동:** 이 항목은 스크립트만 설치하면 작동하지 않습니다. [Windows 연결 설치 안내](bridge/README.md)를 따라 **최초 1회 `bridge/install.cmd`를 실행**한 다음 Tampermonkey 스크립트를 사용하세요. GitHub에서 스크립트를 재설치해도 Windows 연동 프로그램은 자동 설치되지 않습니다.
 
 ## 폴더 구조
 
@@ -22,6 +24,11 @@ scripts/
 │   ├── Kone_Image_Recovery.user.js
 │   ├── Base64_Drag_Decoder.user.js
 │   └── Kio_to_Downloader.user.js
+├── bridge/                        # Kio 다운로드 프로그램용 Windows 연동
+│   ├── install.cmd                # 최초 설치 / 재설치
+│   ├── bridge.ps1                 # 프로토콜 처리 / URL 복사 / 앱 실행
+│   ├── uninstall.cmd              # 연동 제거
+│   └── README.md                  # 설치 및 문제 해결 안내
 ├── history/                       # 스크립트별 패치노트 + 이전 소스
 │   ├── kone-unified/
 │   │   ├── CHANGELOG.md
@@ -50,6 +57,6 @@ scripts/
 - **임시 버전(`-beta.N`) → 실사용 테스트 → 명시적인 컨펌 → 정식 버전** 순서로 변경합니다.
 - 현재 테스트 버전도 `main`의 동일한 업데이트 주소에 배포하므로 다른 설치 기기에 자동 반영될 수 있습니다.
 - `history/`의 구버전 파일은 보관용이며 자동 업데이트용이 아닙니다.
-- 다운로드 프로그램 연동 스크립트는 별도의 Windows 프로토콜 핸들러가 필요합니다.
+- 다운로드 프로그램 연동 스크립트는 별도의 Windows 프로토콜 핸들러가 필요합니다. [Kio Windows 연결 설치 파일 및 안내](bridge/README.md)에서 `install.cmd`를 먼저 실행하세요. Kiosk Downloader 본체도 별도 설치해야 합니다.
 
 관리 규칙은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참고합니다. 공개 저장소에 토큰·비밀번호·쿠키 등 민감한 정보를 포함하지 않습니다.
