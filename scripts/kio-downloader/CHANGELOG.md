@@ -1,6 +1,6 @@
 # 다운로드 프로그램 연동 — 변경 이력
 
-배포 중인 스크립트: [Kio_to_Downloader.user.js](../../scripts/Kio_to_Downloader.user.js)
+배포 중인 스크립트: [Kio_to_Downloader.user.js](./Kio_to_Downloader.user.js)
 
 > GitHub를 통한 체계적인 기록은 2026-11-13부터 시작했습니다. 이전 개발 이력의 날짜와 세부 내용은 일부 부정확할 수 있습니다. 보관 버전은 자동 업데이트 대상이 아닙니다.
 
@@ -10,10 +10,10 @@
 - 테스트 버전 `1.1.1-beta.1`이 사용자의 Windows 환경에서 정상 동작함을 확인해 정식 버전으로 승격했습니다.
 - Kiosk Downloader 실행/창 활성화 뒤 **Ctrl+V를 자동으로 전송**해 공유 링크가 새 다운로드 화면에 전달되도록 수정했습니다.
 - 전경 창의 PID를 확인하고, 확인 실패 시 클립보드에 남긴 URL을 수동으로 붙여넣도록 안내합니다.
-- **변경 대상:** [Windows Bridge](../../bridge/bridge.ps1)만 수정. Tampermonkey `Kio_to_Downloader.user.js`는 기존 `1.1.0` 유지.
+- **변경 대상:** [Windows Bridge](bridge/bridge.ps1)만 수정. Tampermonkey `Kio_to_Downloader.user.js`는 기존 `1.1.0` 유지.
 
 ### Windows 연결 설치 파일 추가 — 2026-11-14 (스크립트 버전 변경 없음)
-- 저장소에 누락되어 있던 최초 설치용 [Windows 연결 파일](../../bridge/README.md)을 추가했습니다.
+- 저장소에 누락되어 있던 최초 설치용 [Windows 연결 파일](bridge/README.md)을 추가했습니다.
 - `install.cmd`는 `kioffdl://` 프로토콜을 현재 Windows 사용자 계정에 등록하고 Kiosk Downloader 실행 파일을 연결합니다.
 - URL 유효성 검사, 클립보드 복사 재시도, 고정 설치 경로 및 제거 기능을 제공합니다.
 - **Tampermonkey 스크립트 `1.1.0` 자체는 변경하지 않았습니다.** Windows에서 실제 실행 검증은 아직 필요합니다.
@@ -29,7 +29,7 @@
 
 **의존성 및 검증:** 별도의 Windows 프로토콜 핸들러 설치가 필요하며, 데스크톱 프로그램 호출의 종단 간 검증은 확인되지 않았습니다.
 
-[버전 소스](v1.1.0.user.js)
+[버전 소스](history/v1.1.0.user.js)
 
 ### Legacy 1.1 — 2026-09-19
 
@@ -37,13 +37,13 @@
 - 별도의 연관 페이지에서 URL에 전달된 암호를 동적 입력 양식에 자동 입력하는 보조 기능을 제공했습니다.
 - 현재의 다운로드 프로그램 연동 스크립트와는 독립적인 전신 구성 요소입니다.
 
-[전신 소스](kio-auto-password-v1.1.user.js)
+[전신 소스](history/kio-auto-password-v1.1.user.js)
 
 ## 이전 버전 목록
 
 | 버전 | 적용 사이트 | 변경 요약 | 소스 |
 | --- | --- | --- | --- |
-| 1.1.0 | `kio.ac` | 사용자 정의 프로토콜을 통한 다운로드 프로그램 호출 | [보기](v1.1.0.user.js) |
-| 1.1 | `*.kio.ac` | 동적 입력 양식의 암호 자동 입력 | [보기](kio-auto-password-v1.1.user.js) |
+| 1.1.0 | `kio.ac` | 사용자 정의 프로토콜을 통한 다운로드 프로그램 호출 | [보기](history/v1.1.0.user.js) |
+| 1.1 | `*.kio.ac` | 동적 입력 양식의 암호 자동 입력 | [보기](history/kio-auto-password-v1.1.user.js) |
 
 **참고:** `kio-auto-password-v1.1.user.js`는 연관된 초기 독립 도구의 보관본으로, 현재 스크립트의 연속 버전은 아닙니다.
