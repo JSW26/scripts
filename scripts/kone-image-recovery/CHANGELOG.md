@@ -1,6 +1,6 @@
 # 이미지 자동 복구 — 변경 이력
 
-배포 중인 스크립트: [Kone_Image_Recovery.user.js](./Kone_Image_Recovery.user.js)
+배포 중인 스크립트: [Kone_Image_Recovery_v0.3.5.user.js](./Kone_Image_Recovery_v0.3.5.user.js)
 
 > GitHub를 통한 체계적인 기록은 2026-11-13부터 시작했습니다. 이전 개발 이력의 날짜와 세부 내용은 일부 부정확할 수 있습니다. 보관 버전은 자동 업데이트 대상이 아닙니다.
 
@@ -18,7 +18,7 @@
 
 **검증:** 사용자 환경에서 `0.3.5-beta.1` 시험판의 정상 작동을 초기 확인받았으며, 요청에 따라 정식 버전으로 승격했습니다. 장기 반복 테스트는 아직 완료되지 않았습니다. 정식 배포에서 복구 알고리즘은 바꾸지 않았습니다.
 
-[버전 소스](history/v0.3.5.user.js)
+[버전 소스](Kone_Image_Recovery_v0.3.5.user.js)
 
 ### 0.3.4 — 2026-11-13
 
@@ -105,4 +105,4 @@
 | 0.3.2 | `kone.gg` | 장시간 비활성 이후 첫 이미지 복구 개선 시도 | [보기](history/v0.3.2.user.js) |
 | 0.3.3 | `kone.gg` | 제어 패널 우측 하단 정렬 | [보기](history/v0.3.3.user.js) |
 | 0.3.4 | `kone.gg` | 사용자 확인 후 UI 패널 제거, 자동 복구 기능 유지 | [보기](history/v0.3.4.user.js) |
-| 0.3.5 | `kone.gg` | SPA 이동 직후 첫 이미지 오류 기록 보존·탭 복귀 재검사 | [보기](history/v0.3.5.user.js) |
+| 0.3.5 | `kone.gg` | SPA 이동 직후 첫 이미지 오류 기록 보존·탭 복귀 재검사 | [보기](Kone_Image_Recovery_v0.3.5.user.js) |

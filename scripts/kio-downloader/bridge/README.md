@@ -7,7 +7,7 @@ Kio 사용자 스크립트의 `Kio ↓` 버튼이 보내는 `kioffdl://` 링크�
 1. [Kiosk Downloader](https://github.com/myparsleycat/kiosk-downloader/releases/latest)를 먼저 설치하거나 포터블 버전을 원하는 위치에 둡니다.
 2. 이 저장소에서 `scripts/kio-downloader/bridge/` 폴더에 있는 **`bridge.ps1`과 `install.cmd`**를 같은 폴더로 다운로드하거나, [저장소 ZIP](https://github.com/JSW26/scripts/archive/refs/heads/main.zip)을 받아 압축 해제합니다.
 3. `scripts/kio-downloader/bridge/install.cmd`를 **더블클릭**합니다. 프로그램을 자동으로 못 찾으면 Kiosk Downloader의 `.exe` 파일을 직접 선택합니다. 관리자 권한은 필요 없습니다. 기존 설치 상태에서도 동일한 파일로 업데이트 가능합니다.
-4. Tampermonkey에 [Kio 연동 스크립트](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/kio-downloader/Kio_to_Downloader.user.js)를 설치하고 `https://kio.ac/c/...` 공유 페이지에서 `Kio ↓`를 누릅니다.
+4. Tampermonkey에 [Kio 연동 스크립트](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/kio-downloader/Kio_to_Downloader_v1.1.0.user.js)를 설치하고 `https://kio.ac/c/...` 공유 페이지에서 `Kio ↓`를 누릅니다.
 5. Firefox에서 외부 애플리케이션 실행을 허용합니다. Kiosk Downloader 창을 활성화하고 **공유 URL 자동 붙여넣기(`Ctrl+V`)**를 수행하여 새 다운로드 화면에서 목록을 불러옵니다.
 
 설치 프로그램은 `%LOCALAPPDATA%\KioDownloaderBridge`에 고정된 런처를 복사하고 현재 사용자 계정의 `kioffdl://` 프로토콜을 등록합니다. ZIP의 원본 폴더는 설치 후 옮기거나 삭제해도 됩니다. Kiosk Downloader의 실행 파일을 옮겼다면 `install.cmd`를 다시 실행하세요.

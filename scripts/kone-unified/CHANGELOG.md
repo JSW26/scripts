@@ -1,6 +1,6 @@
 # 통합 자동 디코더 — 변경 이력
 
-배포 중인 스크립트: [Kone_Unified_Decoder.user.js](./Kone_Unified_Decoder.user.js)
+배포 중인 스크립트: [Kone_Unified_Decoder_v4.0.0.user.js](./Kone_Unified_Decoder_v4.0.0.user.js)
 
 > GitHub를 통한 체계적인 기록은 2026-11-13부터 시작했습니다. 이전 개발 이력의 날짜와 세부 내용은 일부 부정확할 수 있습니다. 보관 버전은 자동 업데이트 대상이 아닙니다.
 
@@ -18,7 +18,7 @@
 
 **검증 및 제한:** 자동화된 일부 테스트 산출물은 존재하지만, 모든 브라우저 및 인증 상태에서의 검증을 의미하지는 않습니다.
 
-[버전 소스](history/v4.0.0.user.js)
+[버전 소스](Kone_Unified_Decoder_v4.0.0.user.js)
 
 ### 3.2.0 — 2026-11-06
 **변경 배경:** 독립적인 사용자 스크립트의 상태 패널이 동일한 화면 영역에 표시되었습니다.
@@ -74,7 +74,7 @@
 | 3.0.1 | `kone.gg`, `kio.ac` | SPA 경로 전환 시 상태 초기화 | [보기](history/v3.0.1.user.js) |
 | 3.1.0 | `kone.gg`, `kio.ac` | 처리 캐시 및 반복 스캔 최적화 | [보기](history/v3.1.0.user.js) |
 | 3.2.0 | `kone.gg`, `kio.ac` | 반투명 UI와 패널 충돌 회피 | [보기](history/v3.2.0.user.js) |
-| 4.0.0 | `kone.gg`, `kio.ac` | 다중 디코딩 형식 및 편의 기능 통합 | [보기](history/v4.0.0.user.js) |
+| 4.0.0 | `kone.gg`, `kio.ac` | 다중 디코딩 형식 및 편의 기능 통합 | [보기](Kone_Unified_Decoder_v4.0.0.user.js) |
 | 2.3.0 | `*.kone.gg` | 중첩 인코딩 자동 해독 | [보기](history/kone-auto-decoder-v2.3.0.user.js) |
 
 **참고:** `kone-auto-decoder-v2.3.0.user.js`는 연관된 초기 독립 도구의 보관본으로, 현재 스크립트의 연속 버전은 아닙니다.

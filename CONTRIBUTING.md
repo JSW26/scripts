@@ -1,38 +1,31 @@
-# Development & Release Guide
+# 저장소 유지보수 규칙
 
-## 저장소 구조
+## 프로젝트별 구조
 
-- `scripts/<script>/NAME.user.js`: 최신 배포본 및 신규 설치 링크
-- `scripts/<script>/README.md`: 해당 스크립트 사용 및 설치 안내
-- `scripts/<script>/CHANGELOG.md`: 해당 스크립트의 패치노트
-- `scripts/<script>/history/`: 구버전 소스
-- `scripts/kio-downloader/bridge/`: Kio → Kiosk Downloader 전용 Windows 연동 파일
-- `scripts/*.user.js`: 기존 Tampermonkey 설치 주소 호환용. **자동 업데이트를 보호하기 위해 유지**
+- `scripts/<종류>/<이름>_v<버전>.user.js`: 현재 배포하는 실행 코드(프로젝트당 1개)
+- `scripts/<종류>/update.meta.js`: Tampermonkey 버전 확인용 메타데이터(실행 코드 없음)
+- `scripts/<종류>/README.md`: 기능, 설치 방법 및 사용 안내
+- `scripts/<종류>/CHANGELOG.md`: 버전별 변경 내용
+- `scripts/<종류>/history/`: 과거 버전만 보관. 현재 버전은 중복 보관하지 않음
+- `scripts/kio-downloader/bridge/`: Kio 다운로드 연동 Windows 프로그램 전용
+- 저장소 최상위 `README.md`: 스크립트 목록 및 설치 링크
 
-## 업데이트 방식
+루트 `scripts/`에 스크립트 실행 파일을 따로 두지 않습니다.
 
-### 1. Preview
-1. 해당 프로젝트의 최신 소스를 `<next-version>-beta.N`으로 갱신합니다.
-2. `@updateURL` 및 `@downloadURL`은 신규 프로젝트 경로를 사용합니다.
-3. 이전 `scripts/<name>.user.js` 호환 주소의 파일에도 동일한 기능과 버전의 코드를 동시에 반영합니다.
-4. 브라우저에서 실사용 검증 전에는 정상 작동이라고 기록하지 않습니다.
-5. 정식 보관본·태그·최종 패치노트는 확정 전 작성하지 않습니다.
+## 업데이트 순서
 
-### 2. Verification
-- 사용자의 실기기 테스트를 통해 동작을 검증합니다.
-- 실패할 경우 `-beta.2`, `-beta.3` 등으로 반복합니다.
-- **사용자의 명시적 승인 전에는 정식 버전으로 승격하지 않습니다.**
+1. 필요한 스크립트만 수정해 `-beta.N` 테스트 버전으로 배포합니다.
+2. 사용자 환경에서 정상 작동 확인 후 명시적인 승인으로 정식 버전을 확정합니다.
+3. 현행 `_v<이전버전>.user.js` 실행 파일을 `history/v<이전버전>.user.js`로 이동합니다.
+4. 새 `_<새버전>.user.js` 실행 파일 하나를 배포하고, `@version`, `@updateURL`, `@downloadURL`을 확인합니다.
+5. `update.meta.js`의 `@version`과 `@downloadURL`을 새 실행 파일 기준으로 업데이트합니다.
+6. 개별 README 및 CHANGELOG와 최상위 README의 파일명·링크·버전을 바꿉니다.
+7. 새 버전 자동 업데이트는 Tampermonkey에서 별도로 테스트합니다. 메타데이터 변경만으로 자동 업데이트 성공을 단정하지 않습니다.
 
-### 3. Stable
-1. 검증된 코드의 `@version`을 정식 버전으로 변경합니다.
-2. 신규 배포 위치와 예전 URL 호환 파일을 함께 갱신합니다.
-3. `scripts/<script>/history/v<version>.user.js`에 보관본을 생성하고 업데이트 메타데이터를 제거합니다.
-4. 프로젝트 `CHANGELOG.md`와 `README.md`, 최상위 `README.md`를 최신화합니다.
+## 보안과 기록
 
-## 기록 원칙
-- 폴더 재배치는 기능 변경이나 버전 상향 사유가 아닙니다.
-- 이전 URL 호환 파일을 삭제하면 기존 설치 사용자들의 자동 업데이트가 끊길 수 있습니다.
-- 서로 독립된 스크립트는 임의로 통합하지 않습니다.
-- 실제 검증한 사실만 기록하고 오래된 이력의 불확실성을 명시합니다.
-- 토큰·쿠키·비밀번호를 공개 저장소에 포함하지 않습니다.
-- 원 저작자 및 외부 라이브러리 라이선스를 유지합니다.
+- 폴더 정리만으로 기능이나 버전은 변경하지 않습니다.
+- 실기기 검증 결과를 임의로 작성하지 않습니다.
+- 서로 다른 스크립트를 임의 통합하지 않습니다.
+- 공개 저장소에 개인정보·쿠키·토큰·암호를 넣지 않습니다.
+- 원 저작자 표기와 라이선스를 유지합니다.
