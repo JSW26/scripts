@@ -11,7 +11,7 @@ Tampermonkey 스크립트 4개를 기능별 폴더로 관리합니다. 각 폴�
 | [코네 통합 자동 디코더](scripts/kone-unified/) | 4.0.0 | [Tampermonkey 설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/kone-unified/Kone_Unified_Decoder_v4.0.0.user.js) | [변경 이력](scripts/kone-unified/CHANGELOG.md) |
 | [코네 이미지 자동 복구](scripts/kone-image-recovery/) | 0.3.5 | [Tampermonkey 설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/kone-image-recovery/Kone_Image_Recovery_v0.3.5.user.js) | [변경 이력](scripts/kone-image-recovery/CHANGELOG.md) |
 | [Base64 드래그 디코더](scripts/base64-drag/) | 1.2.0 | [Tampermonkey 설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/base64-drag/Base64_Drag_Decoder_v1.2.0.user.js) | [변경 이력](scripts/base64-drag/CHANGELOG.md) |
-| [Kio → Kiosk Downloader 연동](scripts/kio-downloader/) | 1.1.0 | [Tampermonkey 설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/kio-downloader/Kio_to_Downloader_v1.1.0.user.js) | [변경 이력](scripts/kio-downloader/CHANGELOG.md) |
+| [Kio → Kiosk Downloader 연동](scripts/kio-downloader/) | 1.2.0 | [Tampermonkey 설치](https://raw.githubusercontent.com/JSW26/scripts/main/scripts/kio-downloader/Kio_to_Downloader_v1.2.0.user.js) | [변경 이력](scripts/kio-downloader/CHANGELOG.md) |
 
 ## 폴더 구조
 
@@ -36,7 +36,7 @@ scripts/
 │   ├── CHANGELOG.md
 │   └── history/
 └── kio-downloader/
-    ├── Kio_to_Downloader_v1.1.0.user.js
+    ├── Kio_to_Downloader_v1.2.0.user.js
     ├── update.meta.js
     ├── README.md
     ├── CHANGELOG.md
@@ -54,7 +54,7 @@ scripts/
 
 1. [Tampermonkey](https://www.tampermonkey.net/)를 설치합니다.
 2. 위 표의 설치 링크에서 해당 사용자 스크립트를 설치합니다.
-3. Kio 다운로드 연동에는 [Windows Bridge 설치](scripts/kio-downloader/bridge/README.md)가 별도로 필요합니다. 기존 Bridge가 정상 작동한다면 다시 설치할 필요는 없습니다.
+3. Kio 다운로드 연동에는 [Windows Bridge 설치](scripts/kio-downloader/bridge/README.md)가 별도로 필요합니다. 1.1.x 또는 1.2.0-beta.1 브릿지 사용자는 새 `install.cmd`를 한 번 실행하세요. 베타 2 브릿지는 그대로 사용할 수 있습니다.
 
 이전 `scripts/*.user.js` 및 버전이 없는 파일 이름은 정리 과정에서 삭제했습니다. **해당 구경로로 설치한 스크립트는 이 표의 새 링크를 통해 다시 설치해야** 향후 업데이트 주소가 바뀝니다. 설치 전에 Tampermonkey에서 기존 항목이 남아 있는지 확인해 중복 활성화하지 마세요.
 
