@@ -1,4 +1,4 @@
-# Kio -> Kiosk Downloader Bridge, 1.2.0-beta.1
+﻿# Kio -> Kiosk Downloader Bridge, 1.2.0-beta.2
 # Windows PowerShell 5.1+, Windows per-user custom URL handler.
 [CmdletBinding(DefaultParameterSetName='Open')]
 param(
@@ -57,11 +57,10 @@ function FindExe {
     return [string]$picker.FileName
 }
 function ParseLink([string] $s) {
-    if ($s -cnotmatch '^kioffdl://(open|selection)/([A-Za-z0-9_-]{8,16000})/?$') {
+    if ($s -cnotmatch '^kioffdl://open/([A-Za-z0-9_-]{8,4096})/?$') {
         throw 'Unsupported Kio bridge link.'
     }
-    $mode = $Matches[1]
-    $encoded = $Matches[2].Replace('-', '+').Replace('_', '/')
+    $encoded = $Matches[1].Replace('-', '+').Replace('_', '/')
     switch ($encoded.Length % 4) {
         0 { }
         2 { $encoded += '==' }
@@ -71,16 +70,6 @@ function ParseLink([string] $s) {
     $bytes = [Convert]::FromBase64String($encoded)
     $decoder = New-Object System.Text.UTF8Encoding($false, $true)
     $text = $decoder.GetString($bytes)
-    $selection = $null
-    if ($mode -ceq 'selection') {
-        $selection = $text | ConvertFrom-Json
-        if ($selection.url -isnot [string] -or $selection.title -isnot [string] -or !$selection.title -or
-            $selection.names -isnot [array] -or !$selection.names.Count) { throw 'Invalid selection.' }
-        foreach ($name in $selection.names) {
-            if ($name -isnot [string] -or !$name.Trim()) { throw 'Invalid filename.' }
-        }
-        $text = $selection.url
-    }
     $result = $null
     if (![Uri]::TryCreate($text, [UriKind]::Absolute, [ref]$result)) {
         throw 'The share URL is invalid.'
@@ -89,7 +78,7 @@ function ParseLink([string] $s) {
         !$result.IsDefaultPort -or $result.UserInfo -or $result.AbsolutePath -cnotmatch '^/c/[A-Za-z0-9_-]+/?$') {
         throw 'Only kio.ac/c/... share links are supported.'
     }
-    return @{ url = $result.GetLeftPart([UriPartial]::Path); selection = $selection }
+    return $result.GetLeftPart([UriPartial]::Path)
 }
 function CopyLink([string] $s) {
     Add-Type -AssemblyName System.Windows.Forms
@@ -101,67 +90,22 @@ function CopyLink([string] $s) {
     }
     Set-Clipboard -Value $s -ErrorAction Stop
 }
-function ApplySelection($hwnd, $request) {
-    Add-Type -AssemblyName UIAutomationClient
-    Add-Type -AssemblyName UIAutomationTypes
-    $scope = [System.Windows.Automation.TreeScope]::Descendants
-    $walker = [System.Windows.Automation.TreeWalker]::RawViewWalker
-    $ui = [System.Windows.Automation.AutomationElement]
-    $checkbox = New-Object System.Windows.Automation.PropertyCondition($ui::ControlTypeProperty, [System.Windows.Automation.ControlType]::CheckBox)
-    $title = New-Object System.Windows.Automation.PropertyCondition($ui::NameProperty, $request.title)
-    $remove = New-Object System.Windows.Automation.PropertyCondition($ui::NameProperty, ([string][char]0xC81C + [char]0xAC70))
-    $clear = -join ([char[]](0xC804,0xCCB4,32,0xD574,0xC81C))
-    $select = -join ([char[]](0xC804,0xCCB4,32,0xC120,0xD0DD))
-    $deadline = [DateTime]::UtcNow.AddSeconds(18)
-    do {
-        $window = $ui::FromHandle($hwnd)
-        $boxes = @($window.FindAll($scope, $checkbox))
-        $header = @($boxes | Where-Object { $_.Current.Name -in @($clear,$select) })
-        if ($header.Count -eq 1 -and $window.FindFirst($scope,$title) -and $window.FindAll($scope,$remove).Count -eq 1) { break }
-        Start-Sleep -Milliseconds 300
-    } while ([DateTime]::UtcNow -lt $deadline)
-    if ($header.Count -ne 1 -or !$window.FindFirst($scope,$title) -or $window.FindAll($scope,$remove).Count -ne 1) {
-        throw 'Selection needs a single ready collection. Check the new download screen.'
+function PasteOnlyIntoDownloader([string] $exe, [string] $link) {
+    $name = [IO.Path]::GetFileNameWithoutExtension($exe)
+    $existing = Get-Process -Name $name,'Kiosk Downloader','kiosk-downloader' -ErrorAction SilentlyContinue |
+        Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero -and ($_.Path -eq $exe -or $_.MainWindowTitle -eq 'Kiosk Desktop') } |
+        Select-Object -First 1
+    if (!$existing) {
+        $info = New-Object System.Diagnostics.ProcessStartInfo
+        $info.FileName = $exe
+        $info.UseShellExecute = $true
+        $info.WorkingDirectory = [IO.Path]::GetDirectoryName($exe)
+        $launched = [Diagnostics.Process]::Start($info)
+        if ($launched) { $launched.Dispose() }
+    } else {
+        [void](New-Object -ComObject WScript.Shell).AppActivate([int]$existing.Id)
     }
-    $toggle = [System.Windows.Automation.TogglePattern]::Pattern
-    $targets = foreach ($name in $request.names) {
-        $condition = New-Object System.Windows.Automation.PropertyCondition($ui::NameProperty, $name)
-        $matches = @(foreach ($box in $boxes) {
-            if ($box.Current.Name) { continue }
-            $parent = $box
-            for ($i=0; $i -lt 6; $i++) {
-                $parent = $walker.GetParent($parent)
-                if (!$parent -or $parent.FindAll($scope,$checkbox).Count -ne 1) { break }
-                if ($parent.FindFirst($scope,$condition)) { $box; break }
-            }
-        })
-        if ($matches.Count -ne 1) { throw 'A selected filename could not be matched uniquely. Check the list manually.' }
-        $matches[0].GetCurrentPattern($toggle)
-    }
-    $master = $header[0].GetCurrentPattern($toggle)
-    # The app turns a mixed header on first, then off on the next toggle.
-    for ($i=0; $i -lt 2 -and $master.Current.ToggleState -ne 'Off'; $i++) {
-        $master.Toggle()
-        Start-Sleep -Milliseconds 150
-    }
-    if ($master.Current.ToggleState -ne 'Off') { throw 'Could not clear the original selection.' }
-    foreach ($target in $targets) {
-        $target.Toggle()
-        Start-Sleep -Milliseconds 100
-        if ($target.Current.ToggleState -ne 'On') { throw 'Check the file selection manually.' }
-    }
-}
-
-function PasteOnlyIntoDownloader([string] $exe) {
-    # Launching a second Electron instance focuses the first via the app's second-instance handler.
-    $info = New-Object System.Diagnostics.ProcessStartInfo
-    $info.FileName = $exe
-    $info.UseShellExecute = $true
-    $info.WorkingDirectory = [IO.Path]::GetDirectoryName($exe)
-    $launched = [Diagnostics.Process]::Start($info)
-    if ($launched) { $launched.Dispose() }
     $shell = New-Object -ComObject WScript.Shell
-    $name = [System.IO.Path]::GetFileNameWithoutExtension($exe)
     # Verify the foreground PID before sending keystrokes, so no other app receives the link.
     if (-not ('KioForeground' -as [type])) {
         Add-Type -TypeDefinition @'
@@ -169,31 +113,62 @@ using System;
 using System.Runtime.InteropServices;
 public static class KioForeground {
     [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
-    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
 }
 '@
     }
-    for ($attempt=0; $attempt -lt 45; $attempt++) {
-        $candidates = @(Get-Process -Name $name -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero })
+    Add-Type -AssemblyName UIAutomationClient
+    Add-Type -AssemblyName UIAutomationTypes
+    $ui = [System.Windows.Automation.AutomationElement]
+    $scope = [System.Windows.Automation.TreeScope]::Descendants
+    $fieldId = New-Object System.Windows.Automation.PropertyCondition($ui::AutomationIdProperty, 'url-input')
+    $fieldLabel = New-Object System.Windows.Automation.PropertyCondition($ui::NameProperty, '공유 링크')
+    $fieldIdentity = New-Object System.Windows.Automation.OrCondition($fieldId, $fieldLabel)
+    $editType = New-Object System.Windows.Automation.PropertyCondition($ui::ControlTypeProperty, [System.Windows.Automation.ControlType]::Edit)
+    $urlField = New-Object System.Windows.Automation.AndCondition($editType, $fieldIdentity)
+    $downloadName = New-Object System.Windows.Automation.PropertyCondition($ui::NameProperty, '다운로드')
+    $buttonType = New-Object System.Windows.Automation.PropertyCondition($ui::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)
+    $downloadsButton = New-Object System.Windows.Automation.AndCondition($downloadName, $buttonType)
+    $deadline = [DateTime]::UtcNow.AddSeconds(30)
+    $nextSend = [DateTime]::MinValue
+    $sends = 0
+    do {
+        $candidates = @(Get-Process -Name $name,'Kiosk Downloader','kiosk-downloader' -ErrorAction SilentlyContinue |
+            Where-Object { $_.MainWindowHandle -ne [IntPtr]::Zero } | Sort-Object Id -Unique)
         foreach ($proc in $candidates) {
-            $sameExe = $false
-            try { $sameExe = [string]::Equals($proc.Path, $exe, [StringComparison]::OrdinalIgnoreCase) } catch {}
-            # Portable EXEs can unpack and launch the actual app from a temporary path.
-            $isKioskWindow = ([string]$proc.MainWindowTitle -eq 'Kiosk Desktop')
-            if (-not $sameExe -and -not $isKioskWindow) { continue }
+            $sameExe = [string]::Equals($proc.Path, $exe, [StringComparison]::OrdinalIgnoreCase)
+            if (!$sameExe -and $proc.MainWindowTitle -ne 'Kiosk Desktop') { continue }
             try {
-                if (-not $shell.AppActivate([int]$proc.Id)) { continue }
-                Start-Sleep -Milliseconds 250
-                [uint32]$foregroundPid = 0
-                $handle = [KioForeground]::GetForegroundWindow()
-                [void][KioForeground]::GetWindowThreadProcessId($handle, [ref]$foregroundPid)
-                if ($foregroundPid -ne [uint32]$proc.Id) { continue }
+                $handle = $proc.MainWindowHandle
+                $window = $ui::FromHandle($handle)
+                $field = $window.FindFirst($scope, $urlField)
+                if ($field -and !$field.Current.IsOffscreen) {
+                    $value = $field.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern)
+                    if ($value.Current.Value -ceq $link) {
+                        if ($sends -eq 0) { [void]$shell.AppActivate([int]$proc.Id) }
+                        return $true
+                    }
+                    $target = $field
+                } else {
+                    # A rendered toolbar indicates that Electron has mounted the app.
+                    $target = $window.FindFirst($scope, $downloadsButton)
+                }
+                if (!$target -or $target.Current.IsOffscreen -or !$target.Current.IsEnabled) { continue }
+                if ($sends -ge 3 -or [DateTime]::UtcNow -lt $nextSend) { continue }
+                if (!$shell.AppActivate([int]$proc.Id)) { continue }
+                $target.SetFocus()
+                Start-Sleep -Milliseconds 100
+                if ([KioForeground]::GetForegroundWindow() -ne $handle -or !$target.Current.HasKeyboardFocus) { continue }
+                if ([System.Windows.Forms.Clipboard]::GetText() -cne $link) { return $false }
                 $shell.SendKeys('^v')
-                return $handle
-            } catch { continue }
+                $sends++
+                $nextSend = [DateTime]::UtcNow.AddMilliseconds(1800)
+            } catch [System.Windows.Automation.ElementNotAvailableException] {
+                # Chromium can replace the accessibility tree while switching views.
+                continue
+            } catch [System.InvalidOperationException] { continue }
         }
-        Start-Sleep -Milliseconds 200
-    }
+        Start-Sleep -Milliseconds 220
+    } while ([DateTime]::UtcNow -lt $deadline)
     return $false
 }
 try {
@@ -214,7 +189,7 @@ using System.Text.RegularExpressions;
 class KioLauncher {
     [STAThread]
     static void Main(string[] args) {
-        if (args.Length != 1 || !Regex.IsMatch(args[0], @"\Akioffdl://(open|selection)/[A-Za-z0-9_-]{8,16000}/?\z")) return;
+        if (args.Length != 1 || !Regex.IsMatch(args[0], @"\Akioffdl://open/[A-Za-z0-9_-]{8,4096}/?\z")) return;
         var bridge = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bridge.ps1");
         var host = Path.Combine(Environment.SystemDirectory, @"WindowsPowerShell\v1.0\powershell.exe");
         var info = new ProcessStartInfo(host, "-NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File \"" + bridge + "\" -Uri \"" + args[0] + "\"");
@@ -258,11 +233,9 @@ class KioLauncher {
     $cfg = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $exe = [string]$cfg.exe
     if (!(IsExe $exe)) { throw 'Kiosk Downloader was moved or removed. Run install.cmd again.' }
-    CopyLink $link.url
-    $hwnd = PasteOnlyIntoDownloader $exe
-    if ($hwnd -and $link.selection) { ApplySelection $hwnd $link.selection }
-    if (!$hwnd) {
-        Notify 'The Kio link was copied, but the app window could not be focused safely. Open Kiosk Downloader and press Ctrl+V manually.' $true
+    CopyLink $link
+    if (!(PasteOnlyIntoDownloader $exe $link)) {
+        Notify '공유 링크가 입력됐는지 확인하지 못했습니다. 다운로더의 새 다운로드 화면에서 공유 링크를 확인해 주세요.' $true
     }
     exit 0
 } catch {
